@@ -25,10 +25,6 @@
 
 <script>
 import flatten from 'flat'
-import Store from 'es6-store'
-
-let translations = new Store('translations');
-let base = new Store('base');
 
 export default {
   name: 'translator',
@@ -95,10 +91,9 @@ export default {
               let keys = Object.keys(json);
               let currentTranslations = JSON.parse(localStorage.getItem('translations'));
               for (let key in keys){
-                console.log(keys[key])
-                //localStorage.setItem('translations',currentTranslations[keys[key]],json[keys[key]])
-                translations.set(keys[key], json[keys[key]])
+                currentTranslations[keys[key]] = json[keys[key]];
               }
+              localStorage.setItem('translations',JSON.stringify(currentTranslations))
               if(this.getTranslation()) {
                 this.data = this.getTranslation();
               } else {

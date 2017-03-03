@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.7",
-    "es6-store": "^1.0.0",
     "flat": "^2.0.1",
     "vue": "^2.1.10",
     "vue-resource": "^1.2.0",
