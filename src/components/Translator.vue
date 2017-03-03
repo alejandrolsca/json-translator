@@ -1,6 +1,5 @@
 <template>
     <div class="translator">
-    <!--<button type="button" class="btn btn-primary" v-on:click="json()">JSON</button>-->
         <form v-on:submit.prevent="save()">
            <div class="form-group">
               <label for="file">Load backup</label><input type="file" class="form-control" id="file" v-on:change="loadBackup">
@@ -12,13 +11,13 @@
           </div>
           <div class="form-group">
             <label for="">Select Language to translate</label>
-            <select class="form-control" v-model="language" v-on:change="localGet()">
+            <select class="form-control" v-model="language" v-on:change="loadTranslation()">
               <option v-for="lang in languages" :value="lang.value">{{lang.label}}</option>
             </select>
           </div><br>
-          <div class="form-group" v-for="(value, key) in defaultCountry">
+          <div class="form-group" v-for="(value, key) in base">
             <label class="path">{{path(key)}}</label>&nbsp;<label for="key">{{value}}</label>
-            <input type="text" class="form-control" id="key" v-model="data[key]" v-on:change="localSave()" :placeholder="value" required="required">
+            <input type="text" class="form-control" id="key" v-model="data[key]" v-on:change="saveTranslation()" :placeholder="value" required="required">
           </div>
         </form>
     </div>
@@ -28,7 +27,8 @@
 import flatten from 'flat'
 import Store from 'es6-store'
 
-let store = new Store('json-translator');
+let translations = new Store('translations');
+let base = new Store('base');
 
 export default {
   name: 'translator',
@@ -46,26 +46,17 @@ export default {
         {"label":"Russian","value":"ru"},
         {"label":"Spanish","value":"es"}
       ],
-      defaultCountry: null
+      base: null
     }
   },
   mounted() {
-    this.getDefaultCountry();
-    this.localGet();
+    this.getBase();
+    this.loadTranslation();
+    this.getTranslation();
   },
   methods: {
-    getDefaultCountry: function() {
-      this.$http.get('static/en.json').then( response => {
-        // success callback
-
-        this.defaultCountry = flatten(response.body);
-
-        //this.data = this.defaultCountry;
-        
-      }, response => {
-        // error callback
-        console.log(response);
-      })
+    getBase: function() {
+              this.base = flatten(JSON.parse(localStorage.getItem('base')))
     },
     json: function(){
       return alert(JSON.stringify(flatten.unflatten(this.data),null, 4));
@@ -83,9 +74,8 @@ export default {
       a.click();
     },
     backup: function(){
-      let backup = store.getAll();
-      let json = JSON.stringify(backup,null,4);
-      let blob = new Blob([json], {type: "application/json"});
+      let backup = this.getAllTranslations();
+      let blob = new Blob([backup], {type: "application/json"});
       let url  = URL.createObjectURL(blob);
 
       let a = document.createElement('a');
@@ -100,22 +90,25 @@ export default {
       reader.onload = function(event) {
         if (confirm('Actual translations will be replaced, do you want to continue?')) {
           try {
-              //let store = new Store('json-translator');
+              localStorage.getItem('translations') || localStorage.setItem('translations',JSON.stringify({}));
               let json = JSON.parse(event.target.result);
               let keys = Object.keys(json);
+              let currentTranslations = JSON.parse(localStorage.getItem('translations'));
               for (let key in keys){
-                store.set(keys[key], json[keys[key]])
+                console.log(keys[key])
+                //localStorage.setItem('translations',currentTranslations[keys[key]],json[keys[key]])
+                translations.set(keys[key], json[keys[key]])
               }
-              console.log(this.language);
-              if(store.get(this.language)) {
-                this.data = Store.deserialize(store.get(this.language));
+              if(this.getTranslation()) {
+                this.data = this.getTranslation();
               } else {
                 this.data = {};
               }
-              document.getElementById("file").value = "";
           } catch(e) {
             console.log(e);
               alert('Please load a valid JSON file.'); // error in the above string (in this case, yes)!
+          } finally {
+            document.getElementById("file").value = "";
           }
         } else {
           document.getElementById("file").value = "";
@@ -124,12 +117,29 @@ export default {
 
       reader.readAsText(event.target.files[0]);
     },
-    localSave: function() {
-      store.set(this.language, Store.serialize(this.data))
+    saveTranslation: function() {
+      localStorage.getItem('translations') || localStorage.setItem('translations',JSON.stringify({}));
+      let currentTranslations = JSON.parse(localStorage.getItem('translations'));
+      currentTranslations[this.language] = JSON.stringify(this.data);
+      localStorage.setItem('translations', JSON.stringify(currentTranslations))
     },
-    localGet: function() {
-        if(store.get(this.language)) {
-          this.data = Store.deserialize(store.get(this.language));
+    getTranslation: function() {
+        localStorage.getItem('translations') || localStorage.setItem('translations',JSON.stringify({}));
+        if(JSON.parse(localStorage.getItem('translations'))[this.language]) {
+          return JSON.parse(JSON.parse(localStorage.getItem('translations'))[this.language]);
+        }
+    },
+    getAllTranslations: function() {
+        localStorage.getItem('translations') || localStorage.setItem('translations',JSON.stringify({}));
+        if(localStorage.getItem('translations')) {
+          console.log(localStorage.getItem('translations'))
+          return localStorage.getItem('translations');
+        }
+    },
+    loadTranslation: function() {
+        localStorage.getItem('translations') || localStorage.setItem('translations',JSON.stringify({}));
+        if(JSON.parse(localStorage.getItem('translations'))[this.language]) {
+          this.data = JSON.parse(JSON.parse(localStorage.getItem('translations'))[this.language]);
         } else {
           this.data = {};
         }
