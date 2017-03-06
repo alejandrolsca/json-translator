@@ -1,7 +1,9 @@
 <template>
   <div id="app" class="col-md-12">
     <header class="row">
-      <img src="./assets/az-logo.svg">
+      <img src="./assets/az-logo.svg"><br/><br/>
+      <router-link class="btn btn-warning" to="/">Load Base JSON</router-link> | 
+      <router-link class="btn btn-warning" to="Translator">Translator</router-link>
     </header>
     <router-view></router-view>
     <footer>
@@ -45,5 +47,8 @@ export default {
     footer {
       text-align: right;
       padding: 0 0 18pt 0;
+    }
+    a, a:visited {
+      color:#fff;
     }
 </style>
