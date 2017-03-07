@@ -1,10 +1,12 @@
 <template>
   <div id="app" class="col-md-12">
     <header class="row">
-      <img src="./assets/az-logo.svg"><br/><br/>
+      <img class="als-logo" src="./assets/az-logo.svg">
+    </header>
+    <sub-header class="row">
       <router-link class="btn btn-warning" to="/">Load Base JSON</router-link> | 
       <router-link class="btn btn-warning" to="Translator">Translator</router-link>
-    </header>
+    </sub-header>
     <router-view></router-view>
     <footer>
       <a class="als-logo" href="https://als.astrazeneca.net" target="_blank">Built by ALS</a>
@@ -28,7 +30,11 @@ export default {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    .als-logo {
+    header .als-logo {
+      width:50px;
+      height: auto;
+    }
+    footer .als-logo {
       font-size: 1px;
       color: transparent;
       display: inline-block;
@@ -39,10 +45,22 @@ export default {
       background-repeat: no-repeat;
     }
     header {
-      text-align: center;
-      padding: 9pt 0 9pt 0;
-      margin: 0 0 9pt 0;
+      display: block;
+      position: relative;
+      text-align: left;
+      padding: 9pt;
       background-color: #2e3a47;
+      z-index: 2;
+    }
+    sub-header {
+      display: block;
+      position: relative;
+      text-align: left;
+      padding: 9pt;
+      background-color: #2e3a47;
+      border-top:1px solid #545c67;
+      box-shadow: 0 0 10px rgba(6,7,9,.6);
+      z-index: 1;
     }
     footer {
       text-align: right;
